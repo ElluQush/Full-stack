@@ -1,0 +1,26 @@
+{
+  "name": "part3",
+  "version": "1.0.0",
+  "description": "Full Stack open course",
+  "homepage": "https://github.com/ElluQush/Full-stack#readme",
+  "bugs": {
+    "url": "https://github.com/ElluQush/Full-stack/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/ElluQush/Full-stack.git"
+  },
+  "license": "ISC",
+  "author": "",
+  "type": "commonjs",
+  "main": "index.js",
+  "directories": {
+    "example": "example"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "dependencies": {
+    "cors": "^2.8.6"
+  }
+}

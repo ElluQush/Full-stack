@@ -1,0 +1,11 @@
+GET https://full-stack-w4j7.onrender.com/api/persons
+
+###
+
+POST https://full-stack-w4j7.onrender.com/api/persons
+Content-Type: application/json
+
+{
+    "name": "asdasd",
+    "number": "123123123"
+}

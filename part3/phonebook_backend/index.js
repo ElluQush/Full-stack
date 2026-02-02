@@ -80,7 +80,6 @@ app.post('/api/persons', (request, response) => {
     }*/
 
     const person = new Person({
-        id: generateId(),
         name: body.name,
         number: body.number
     })

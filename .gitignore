@@ -1,3 +1,4 @@
 example/
 example-backend/
 node_modules/
+.env

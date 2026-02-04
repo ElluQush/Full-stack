@@ -67,7 +67,7 @@ const App = () => {
             .then(returnedPerson => {
                 setPersons(persons.concat(returnedPerson))
                 setNotification({
-                    message: `Added ${returnedPerson.name}`,
+                    message: `Addded ${returnedPerson.name}`,
                     type: 'success'})
                 setTimeout(() => {
                     setNotification(null)

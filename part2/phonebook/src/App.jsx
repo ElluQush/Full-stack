@@ -43,7 +43,7 @@ const App = () => {
                         setNewName('')
                         setNewNumber('')
                     })
-                    .catch(error => {
+                    .catch(() => {
                         setNotification({
                             message: `Information of ${changedPerson.name} has already been removed from server`,
                             type: 'error'
@@ -67,7 +67,7 @@ const App = () => {
             .then(returnedPerson => {
                 setPersons(persons.concat(returnedPerson))
                 setNotification({
-                    message: `Addded ${returnedPerson.name}`,
+                    message: `Added ${returnedPerson.name}`,
                     type: 'success'})
                 setTimeout(() => {
                     setNotification(null)
@@ -97,7 +97,7 @@ const App = () => {
             .then(() => {
                 setPersons(persons.filter(p => p.id != id))
             })
-            .catch(error => {
+            .catch(() => {
                 alert(
                     `the person '${person.id}' was already deleted from server`
                 )

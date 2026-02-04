@@ -43,9 +43,9 @@ const App = () => {
                         setNewName('')
                         setNewNumber('')
                     })
-                    .catch(() => {
+                    .catch((error) => {
                         setNotification({
-                            message: `Information of ${changedPerson.name} has already been removed from server`,
+                            message: error.response.data.error,
                             type: 'error'
                         })
                         setTimeout(() => {

@@ -1,4 +1,5 @@
 example/
 example-backend/
 node_modules/
+part3-notes-backend
 .env

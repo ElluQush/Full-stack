@@ -1,4 +1,4 @@
-const { test, after } = require('node:test')
+const { test, after, describe } = require('node:test')
 const assert = require('node:assert')
 const mongoose = require('mongoose')
 const supertest = require('supertest')
@@ -9,7 +9,7 @@ const api = supertest(app)
 test('all blogs are returned as json', async () => {
     const response = await api.get('/api/blogs')
 
-    assert.strictEqual(response.body.length, 3)
+    assert.strictEqual(response.body.length, 14)
 })
 
 test('unique identifier property of the blog posts is named id', async () => {
@@ -91,6 +91,63 @@ test('missing url responds with 400', async () => {
         .post('/api/blogs')
         .send(newBlog)
         .expect(400)
+})
+
+describe('deletion of a blog', () => {
+    test('succeed with status code 204 if id is valid', async () => {
+        const firstResponse = await api.get('/api/blogs')
+        const blogToDelete = firstResponse.body[0]
+
+        await api.delete(`/api/blogs/${blogToDelete.id}`).expect(204)
+
+        const secondResponse = await api.get('/api/blogs')
+
+        const ids = secondResponse.body.map(b => b.id)
+
+        assert(!ids.includes(blogToDelete.id))
+    })
+})
+
+describe('updating a blog', () => {
+    test('succeeds with code 200 if succesful addition to likes', async () => {
+        const firstResponse = await api.get('/api/blogs')
+        const blogToUpdate = firstResponse.body[0]
+
+        const updatedBlog = {
+            ...blogToUpdate,
+            likes: blogToUpdate.likes + 1
+        }
+
+        await api
+            .put(`/api/blogs/${blogToUpdate.id}`)
+            .send(updatedBlog)
+            .expect(200)
+
+        const secondResponse = await api.get('/api/blogs')
+        const updated = secondResponse.body.find(b => b.id === blogToUpdate.id)
+
+        assert.strictEqual(updated.likes, blogToUpdate.likes + 1)
+    })
+
+    test('succeed with code 200 if succesful update of title', async () => {
+        const firstResponse = await api.get('/api/blogs')
+        const blogToUpdate = firstResponse.body[0]
+
+        const updatedBlog = {
+            ...blogToUpdate,
+            title: "tsiiga på denhä"
+        }
+
+        await api
+            .put(`/api/blogs/${blogToUpdate.id}`)
+            .send(updatedBlog)
+            .expect(200)
+
+        const secondResponse = await api.get('/api/blogs')
+        const updated = secondResponse.body.find(b => b.id === blogToUpdate.id)
+
+        assert.strictEqual(updated.title, "tsiiga på denhä")
+    })
 })
 
 after(async () => {

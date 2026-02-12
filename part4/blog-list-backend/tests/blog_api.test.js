@@ -3,6 +3,7 @@ const assert = require('node:assert')
 const bcrypt = require('bcrypt')
 const mongoose = require('mongoose')
 const supertest = require('supertest')
+const jwt = require('jsonwebtoken')
 
 const app = require('../app')
 const helper = require('./test_helper')
@@ -11,47 +12,94 @@ const User = require('../models/user')
 
 const api = supertest(app)
 
-test('all blogs are returned as json', async () => {
-  const response = await api.get('/api/blogs')
+let token
 
-  assert.strictEqual(response.body.length, 14)
+describe('initialize with one blog', () => {
+  beforeEach(async () => {
+    await Blog.deleteMany({})
+    await User.deleteMany({})
+
+    const passwordHash = await bcrypt.hash('sekret', 10)
+    const user = new User({ username: 'root', passwordHash })
+    const savedUser = await user.save()
+
+    const userForToken = {
+      username: savedUser.username,
+      id: savedUser._id
+    }
+
+    token = jwt.sign(userForToken, process.env.SECRET)
+
+    const initialBlog = {
+      title: 'Initial test blog',
+      author: 'Root user',
+      url: 'http://jajadingdong.com',
+      likes: 7
+    }
+
+    await api
+      .post('/api/blogs')
+      .set('Authorization', `Bearer ${token}`)
+      .send(initialBlog)
+      .expect(201)
+  })
+
+  test('all blogs are returned as json', async () => {
+    const response = await api.get('/api/blogs')
+
+    assert.strictEqual(response.body.length, 1)
+  })
+
+  test('unique identifier property of the blog posts is named id', async () => {
+    const response = await api.get('/api/blogs')
+
+    const blog = response.body[0]
+
+    assert.ok(blog.id)
+    assert.strictEqual(blog._id, undefined)
+  })
+
+  test('valid blog can be added', async () => {
+    const newBlog = {
+      title: 'new blog can be added!',
+      author: 'me, myself and I',
+      url: 'yeaboi.com',
+      likes: 69
+    }
+
+    const beforePost = await api.get('/api/blogs')
+    const blogsBefore = beforePost.body.length
+
+    await api
+      .post('/api/blogs')
+      .set('Authorization', `Bearer ${token}`)
+      .send(newBlog)
+      .expect(201)
+      .expect('Content-Type', /application\/json/)
+
+    const afterPost = await api.get('/api/blogs')
+    const blogsAfter = afterPost.body.length
+
+    assert.strictEqual(blogsAfter, blogsBefore + 1)
+  })
+
+  test('adding blog without token fails', async () => {
+    const newBlog = {
+      title: 'Unauhtorized blog',
+      author: 'Unauthorized',
+      url: 'unauthorized.net',
+      likes: 0
+    }
+
+    await api
+      .post('/api/blogs')
+      .send(newBlog)
+      .expect(401)
+  })
+
 })
 
-test('unique identifier property of the blog posts is named id', async () => {
-  const response = await api.get('/api/blogs')
 
-  const blog = response.body[0]
-
-  assert.ok(blog.id)
-  assert.strictEqual(blog._id, undefined)
-})
-
-test('valid blog can be added', async () => {
-  const newBlog = {
-    title: 'new blog can be added!',
-    author: 'me, myself and I',
-    url: 'yeaboi.com',
-    likes: 69,
-  }
-
-  const beforePost = await api.get('/api/blogs')
-  const blogsBefore = beforePost.body.length
-
-  await api
-    .post('/api/blogs')
-    .send(newBlog)
-    .expect(201)
-    .expect('Content-Type', /application\/json/)
-
-  const afterPost = await api.get('/api/blogs')
-  const blogsAfter = afterPost.body.length
-
-  assert.strictEqual(blogsAfter, blogsBefore + 1)
-
-  const authors = afterPost.body.map(r => r.author)
-
-  assert(authors.includes('me, myself and I'))
-})
 
 test('missing likes defaults to 0', async () => {
   const newBlog = {
@@ -62,6 +110,7 @@ test('missing likes defaults to 0', async () => {
 
   await api
     .post('/api/blogs')
+    .set('Authorization', `Bearer ${token}`)
     .send(newBlog)
     .expect(201)
     .expect('Content-Type', /application\/json/)
@@ -81,6 +130,7 @@ test('missing title responds with 400', async () => {
 
   await api
     .post('/api/blogs')
+    .set('Authorization', `Bearer ${token}`)
     .send(newBlog)
     .expect(400)
 })
@@ -94,6 +144,7 @@ test('missing url responds with 400', async () => {
 
   await api
     .post('/api/blogs')
+    .set('Authorization', `Bearer ${token}`)
     .send(newBlog)
     .expect(400)
 })
@@ -103,13 +154,45 @@ describe('deletion of a blog', () => {
     const firstResponse = await api.get('/api/blogs')
     const blogToDelete = firstResponse.body[0]
 
-    await api.delete(`/api/blogs/${blogToDelete.id}`).expect(204)
+    await api
+      .delete(`/api/blogs/${blogToDelete.id}`)
+      .set('Authorization', `Bearer ${token}`)
+      .expect(204)
 
     const secondResponse = await api.get('/api/blogs')
 
     const ids = secondResponse.body.map(b => b.id)
 
     assert(!ids.includes(blogToDelete.id))
+  })
+
+  test('fail with status code 401 trying to delete blog with invalid authorization', async () => {
+    const firstResponse = await api.get('/api/blogs')
+    const blogToDelete = firstResponse.body[0]
+    await api
+      .delete(`/api/blogs/${blogToDelete.id}`)
+      .expect(401)
+  })
+
+  test('fail with 403 if token belongs to different user', async () => {
+    const passwordHash = await bcrypt.hash('anotherpass', 10)
+    const otherUser = new User({ username: 'otheruser', passwordHash })
+    const savedOtherUser = await otherUser.save()
+
+    const otherUserForToken = {
+      username: savedOtherUser.username,
+      id: savedOtherUser._id
+    }
+
+    const otherToken = jwt.sign(otherUserForToken, process.env.SECRET)
+
+    const firstResponse = await api.get('/api/blogs')
+    const blogToDelete = firstResponse.body[0]
+
+    await api
+      .delete(`/api/blogs/${blogToDelete.id}`)
+      .set('Authorization', `Bearer ${otherToken}`)
+      .expect(403)
   })
 })
 

@@ -1,0 +1,10 @@
+post http://localhost:3003/api/blogs
+Content-Type: application/json
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6Im1hamFlbGkiLCJpZCI6IjY5OGRhMDQxNzkwODhiMjViMDRhZmEwYSIsImlhdCI6MTc3MDkwNjI2N30.K7w-VlKtH7r0RfrCu3SI1N4itJjR9I_5TQB__Nzjiik
+
+{
+    "title": "Moreeeeeeeeeeee middleware",
+    "author": "wizard",
+    "url": "www.magictings.ye",
+    "likes": 0
+}

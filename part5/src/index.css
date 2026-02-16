@@ -1,0 +1,15 @@
+.notification {
+    background: lightgrey;
+    font-size: 20px;
+    border-style: solid;
+    padding: 10px;
+    margin-bottom: 10px;
+}
+
+.notification.success {
+    color: green;
+}
+
+.notification.error {
+    color: red;
+}

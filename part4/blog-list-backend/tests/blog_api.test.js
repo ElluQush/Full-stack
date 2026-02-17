@@ -223,7 +223,7 @@ describe('updating a blog', () => {
 
     const updatedBlog = {
       ...blogToUpdate,
-      title: "tsiiga på denhä"
+      title: 'tsiiga på denhä'
     }
 
     await api
@@ -234,7 +234,7 @@ describe('updating a blog', () => {
     const secondResponse = await api.get('/api/blogs')
     const updated = secondResponse.body.find(b => b.id === blogToUpdate.id)
 
-    assert.strictEqual(updated.title, "tsiiga på denhä")
+    assert.strictEqual(updated.title, 'tsiiga på denhä')
   })
 })
 

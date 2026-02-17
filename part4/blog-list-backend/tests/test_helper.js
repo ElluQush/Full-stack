@@ -9,7 +9,7 @@ const getAuthToken = async (api) => {
 }
 
 const nonExistingId = async () => {
-  const blog = new Blog({ title: "removesoon", author: "nobody", url: "nah.com" })
+  const blog = new Blog({ title: 'removesoon', author: 'nobody', url: 'nah.com' })
   await blog.save()
   await blog.deleteOne()
   return blog._id.toString()

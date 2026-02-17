@@ -12,13 +12,13 @@ const app = express()
 logger.info('connecting to', config.url)
 
 mongoose
-    .connect(config.url, { family: 4 })
-    .then(() => {
-        console.log('connected to MongoDB')
-    })
-    .catch(error => {
-        console.log('error connecting to MongoDB:', error.message)
-    })
+  .connect(config.url, { family: 4 })
+  .then(() => {
+    console.log('connected to MongoDB')
+  })
+  .catch(error => {
+    console.log('error connecting to MongoDB:', error.message)
+  })
 
 app.use(express.json())
 app.use(middleware.requestLogger)

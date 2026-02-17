@@ -1,7 +1,5 @@
 const blogRouter = require('express').Router()
 const Blog = require('../models/blog')
-const User = require('../models/user')
-const jwt = require('jsonwebtoken')
 const { userExtractor } = require('../utils/middleware')
 
 blogRouter.get('/', async (request, response) => {
@@ -23,10 +21,12 @@ blogRouter.post('/', userExtractor, async (request, response) => {
   })
 
   const savedBlog = await blog.save()
-  user.blogs = user.blogs.concat(savedBlog._id)
+  const populatedBlog = await Blog.findById(savedBlog._id)
+    .populate('user', { username: 1, name: 1 })
+  user.blogs = user.blogs.concat(populatedBlog._id)
   await user.save()
 
-  response.status(201).json(savedBlog)
+  response.status(201).json(populatedBlog)
 })
 
 blogRouter.delete('/:id', userExtractor, async (request, response) => {
@@ -40,7 +40,7 @@ blogRouter.delete('/:id', userExtractor, async (request, response) => {
   if (blog.user.toString() !== user._id.toString()) {
     return response.status(403).json({ error: 'only creator can delete blog' })
   }
-  
+
   await Blog.findByIdAndDelete(request.params.id)
   response.status(204).end()
 })
@@ -49,7 +49,7 @@ blogRouter.put('/:id', async (request, response, next ) => {
   const { title, author, url, likes } = request.body
 
   try {
-    const blog = await Blog.findById(request.params.id)
+    const blog = await Blog.findById(request.params.id).populate('user', { username: 1, name: 1 })
 
     if (!blog) {
       return response.status(404).end()

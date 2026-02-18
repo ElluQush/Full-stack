@@ -1,8 +1,15 @@
-# React + Vite
+Part 5
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+Playwright end-to-end testing is in e2e-test folder
 
-Currently, two official plugins are available:
+Run backend in part4/blog-list-backend with:
+    npm run start:test
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react/README.md) uses [Babel](https://babeljs.io/) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+Run frontend in part5 with:
+    npm run dev
+
+Run tests in e2e-tests with:
+    npm test
+
+Browser engine to be used can be defined with the command line parameter:
+    npm test -- --project chromium
